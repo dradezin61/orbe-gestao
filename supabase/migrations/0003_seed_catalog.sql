@@ -1,0 +1,42 @@
+-- Catálogo inicial da loja. Produtos fictícios, criados uma vez; alterações de
+-- preço e estoque depois disso ficam por conta do painel.
+
+insert into public.products (slug, name, summary, description, category, price_cents, stock)
+values
+  ('luminaria-arco', 'Luminária Arco', 'Luz difusa para leitura, com haste ajustável.',
+   'Luminária de mesa em metal com acabamento fosco. A haste articulada permite direcionar a luz sem ofuscar a tela. Lâmpada LED inclusa, 4 W, com temperatura de cor neutra.',
+   'Iluminação', 28900, 14),
+  ('luminaria-pendente-esfera', 'Pendente Esfera', 'Vidro jateado que espalha a luz por igual.',
+   'Pendente de vidro jateado com cúpula de 25 cm, para mesa de jantar ou bancada. Acompanha 1,5 m de cabo têxtil e canopla em metal escovado.',
+   'Iluminação', 41900, 6),
+  ('cadeira-linea', 'Cadeira Línea', 'Assento em compensado moldado, base em aço.',
+   'Cadeira com assento e encosto em compensado moldado e base em aço tubular pintado. Suporta até 120 kg e empilha para guardar.',
+   'Casa', 64900, 9),
+  ('mesa-lateral-orbe', 'Mesa Lateral Orbe', 'Tampo redondo de 45 cm, altura de sofá.',
+   'Mesa lateral com tampo redondo em MDF revestido e pés em madeira maciça. Altura de 52 cm, pensada para ficar no braço do sofá.',
+   'Casa', 38900, 11),
+  ('organizador-mesa', 'Organizador de Mesa', 'Três divisórias para o que vive solto.',
+   'Organizador em aço com pintura eletrostática e base emborrachada. Três divisórias para canetas, cabos e blocos de anotação.',
+   'Escritório', 12900, 32),
+  ('suporte-notebook', 'Suporte para Notebook', 'Eleva a tela à altura dos olhos.',
+   'Suporte em alumínio com seis níveis de altura e recorte para circulação de ar. Compatível com notebooks de 11 a 16 polegadas.',
+   'Escritório', 18900, 21),
+  ('caderno-pautado', 'Caderno Pautado', '160 páginas, costura aparente.',
+   'Caderno costurado com 160 páginas de papel 90 g, pauta discreta e capa em papelão prensado. Abre plano sobre a mesa.',
+   'Escritório', 6900, 48),
+  ('prateleira-modular', 'Prateleira Modular', 'Módulo de 60 cm que se combina.',
+   'Módulo de prateleira em madeira com suportes em aço. Pode ser usado sozinho ou combinado na vertical e na horizontal.',
+   'Casa', 24900, 17),
+  ('jarra-vidro', 'Jarra de Vidro', '1,2 litro, com tampa de cortiça.',
+   'Jarra em vidro borossilicato resistente a variações de temperatura, com tampa de cortiça natural e bico que não pinga.',
+   'Casa', 9900, 26),
+  ('porta-cabos-couro', 'Porta-cabos de Couro', 'Quatro tiras para organizar cabos.',
+   'Conjunto com quatro tiras de couro legítimo e botão de pressão em latão, para enrolar e prender cabos na mesa ou na mochila.',
+   'Acessórios', 5900, 40),
+  ('capa-notebook-feltro', 'Capa de Feltro', 'Feltro de lã para notebooks de 14".',
+   'Capa em feltro de lã de 3 mm com fecho magnético, forro interno macio e bolso externo para a fonte.',
+   'Acessórios', 14900, 19),
+  ('kit-canetas', 'Kit de Canetas', 'Três espessuras, tinta preta à prova d''água.',
+   'Kit com três canetas de ponta porosa nas espessuras 0,3, 0,5 e 0,8 mm, com tinta preta à prova d''água.',
+   'Escritório', 7900, 35)
+on conflict (slug) do nothing;

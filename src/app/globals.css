@@ -1,0 +1,50 @@
+@import "tailwindcss";
+
+:root {
+  --background: #f6f7fa;
+  --surface: #ffffff;
+  --surface-muted: #eceef4;
+  --foreground: #171a21;
+  --muted: #5a616e;
+  --border: #e1e4ec;
+  --brand: #343c8f;
+  --brand-strong: #272e73;
+  --brand-soft: #e8eaf8;
+  --accent: #b8710f;
+  --danger: #a5261e;
+  --danger-soft: #fbe7e5;
+  --success: #1c6e46;
+  --success-soft: #e2f1e9;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-soft: var(--brand-soft);
+  --color-accent: var(--accent);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-success: var(--success);
+  --color-success-soft: var(--success-soft);
+  --font-sans: var(--font-jakarta), ui-sans-serif, system-ui, sans-serif;
+}
+
+body {
+  background-color: var(--background);
+  color: var(--foreground);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
+}
