@@ -115,9 +115,13 @@ export async function checkout() {
     await supabase.rpc("attach_checkout_session", { p_order: orderId, p_session: session.id });
   } catch (erro) {
     // Sem sessão de pagamento não há pedido: devolve o estoque reservado.
-    console.error(`[checkout] falhou: ${erro instanceof Error ? erro.name : "desconhecido"}`);
+    // `motivo` carrega só o tipo do erro da Stripe (nunca a chave nem dados do
+    // cliente), para dar diagnóstico sem precisar abrir os registros do servidor.
+    const detalhe = erro as { type?: string; code?: string; name?: string };
+    const motivo = `${detalhe.type ?? detalhe.name ?? "desconhecido"}:${detalhe.code ?? "sem_codigo"}`.replace(/[^\w:.-]/g, "");
+    console.error(`[checkout] falhou: ${motivo}`);
     await createAdminClient().rpc("release_unpaid_order", { p_order: orderId });
-    back("/carrinho", "/carrinho", "erro", "pagamento_indisponivel");
+    redirect(`/carrinho?erro=pagamento_indisponivel&motivo=${encodeURIComponent(motivo)}`);
   }
 
   await clearCart();
