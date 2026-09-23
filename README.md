@@ -9,7 +9,8 @@ Desenvolvido por [Gabriel Andrade](https://gabriel-andrade-omega.vercel.app/).
 ## O que funciona
 
 **Cliente**
-- Cria conta e entra com e-mail e senha.
+- Cria conta e entra com e-mail e senha. Esqueceu a senha? Recebe por e-mail um
+  link de uso único (válido por 1 hora) para criar outra.
 - Navega pelo catálogo com busca e filtro por categoria, vendo o estoque atual.
 - Monta o carrinho, ajusta quantidades e paga com cartão na página da Stripe.
 - Acompanha os pedidos em "Meus pedidos": aguardando pagamento, pago, enviado
@@ -55,6 +56,8 @@ Validade: qualquer data futura. CVC: três dígitos quaisquer.
   Tailwind CSS.
 - **Supabase:** Postgres e autenticação, com a sessão em cookies (`@supabase/ssr`).
 - **Stripe Checkout** em modo de teste, com confirmação por webhook assinado.
+- **Brevo:** e-mail de recuperação de senha, enviado com `after()` para não
+  atrasar a resposta. Sem `BREVO_API_KEY`, o app funciona e só não envia.
 - **Zod:** validação dos formulários no servidor.
 
 ### Regras no banco de dados

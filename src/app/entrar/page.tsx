@@ -32,6 +32,9 @@ export default async function SignInPage({ searchParams }: PageProps<"/entrar">)
           <div className="grid gap-1.5">
             <label htmlFor="password" className={label}>Senha</label>
             <input id="password" name="password" type="password" autoComplete="current-password" required minLength={8} className={input} />
+            <Link href="/esqueci-senha" className="justify-self-end text-sm font-semibold text-brand underline underline-offset-2">
+              Esqueci minha senha
+            </Link>
           </div>
           <SubmitButton pendingLabel="Entrando…">Entrar</SubmitButton>
         </form>
