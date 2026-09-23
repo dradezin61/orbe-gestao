@@ -20,6 +20,8 @@ export type CartItem = {
   priceCents: number;
   stock: number;
   active: boolean;
+  imagePath: string | null;
+  imageAlt: string | null;
   quantity: number;
   subtotalCents: number;
 };
@@ -66,9 +68,20 @@ export async function cartItems(): Promise<{ items: CartItem[]; totalCents: numb
   const supabase = await createClient();
   const { data } = await supabase
     .from("products")
-    .select("id, slug, name, price_cents, stock, active")
+    .select("id, slug, name, price_cents, stock, active, image_path, image_alt")
     .in("id", lines.map((line) => line.id))
-    .returns<{ id: string; slug: string; name: string; price_cents: number; stock: number; active: boolean }[]>();
+    .returns<
+      {
+        id: string;
+        slug: string;
+        name: string;
+        price_cents: number;
+        stock: number;
+        active: boolean;
+        image_path: string | null;
+        image_alt: string | null;
+      }[]
+    >();
 
   const items = lines.flatMap((line) => {
     const product = data?.find((p) => p.id === line.id);
@@ -81,6 +94,8 @@ export async function cartItems(): Promise<{ items: CartItem[]; totalCents: numb
         priceCents: product.price_cents,
         stock: product.stock,
         active: product.active,
+        imagePath: product.image_path,
+        imageAlt: product.image_alt,
         quantity: line.q,
         subtotalCents: product.price_cents * line.q,
       },

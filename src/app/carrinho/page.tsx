@@ -3,6 +3,7 @@ import Link from "next/link";
 
 import { checkout, updateCartLine } from "@/app/cart-actions";
 import { Flash } from "@/components/flash";
+import { ProductImage } from "@/components/product-image";
 import { SubmitButton } from "@/components/submit-button";
 import { btnPrimary, btnSecondary, card } from "@/components/ui";
 import { getViewer } from "@/lib/auth";
@@ -39,6 +40,19 @@ export default async function CartPage({ searchParams }: PageProps<"/carrinho">)
           <ul className="mt-4 grid gap-3">
             {items.map((item) => (
               <li key={item.id} className={`${card} flex flex-wrap items-center justify-between gap-4 p-4 sm:p-5`}>
+                <Link
+                  href={`/produto/${item.slug}`}
+                  className="w-20 shrink-0 rounded-lg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand"
+                >
+                  <ProductImage
+                    path={item.imagePath}
+                    alt={item.imageAlt}
+                    name={item.name}
+                    sizes="80px"
+                    className="rounded-lg"
+                  />
+                </Link>
+
                 <div className="min-w-40 flex-1">
                   <h2 className="font-semibold">
                     <Link href={`/produto/${item.slug}`} className="hover:text-brand">

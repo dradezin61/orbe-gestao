@@ -19,6 +19,14 @@ const produtoSchema = z.object({
   price: z.coerce.number().positive().max(100000),
   stock: z.coerce.number().int().min(0).max(100000),
   active: z.literal(["on", null]).optional(),
+  // Caminho de uma imagem servida pelo próprio app, como /products/jarra-vidro.jpg.
+  imagePath: z
+    .string()
+    .trim()
+    .max(300)
+    .regex(/^(\/[A-Za-z0-9._/-]+\.(jpg|jpeg|png|webp|avif))?$/, "caminho inválido")
+    .optional(),
+  imageAlt: z.string().trim().max(300).optional(),
 });
 
 export async function saveProduct(formData: FormData) {
@@ -33,10 +41,14 @@ export async function saveProduct(formData: FormData) {
     price: String(formData.get("price") ?? "").replace(".", "").replace(",", "."),
     stock: formData.get("stock"),
     active: formData.get("active"),
+    imagePath: formData.get("imagePath") ?? "",
+    imageAlt: formData.get("imageAlt") ?? "",
   });
   if (!parsed.success) redirect("/painel?aba=produtos&erro=dados_invalidos");
 
-  const { id, name, summary, description, category, price, stock, active } = parsed.data;
+  const { id, name, summary, description, category, price, stock, active, imagePath, imageAlt } = parsed.data;
+  // Foto sem descrição deixaria quem usa leitor de tela sem informação nenhuma.
+  if (imagePath && !imageAlt) redirect("/painel?aba=produtos&erro=descricao_da_foto");
   const supabase = await createClient();
   const { error } = await supabase.rpc("save_product", {
     p_id: id || null,
@@ -47,6 +59,8 @@ export async function saveProduct(formData: FormData) {
     p_price_cents: Math.round(price * 100),
     p_stock: stock,
     p_active: active === "on",
+    p_image_path: imagePath || null,
+    p_image_alt: imageAlt || null,
   });
   if (error) redirect(`/painel?aba=produtos&erro=${errorCodeFrom(error)}`);
 

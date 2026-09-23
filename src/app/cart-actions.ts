@@ -90,6 +90,15 @@ export async function checkout() {
   });
   if (error || !orderId) back("/carrinho", "/carrinho", "erro", errorCodeFrom(error));
 
+  // A cobrança usa o pedido já gravado, não a leitura do carrinho: se o preço
+  // mudar entre uma coisa e outra, vale o que ficou registrado no pedido.
+  const { data: snapshot } = await supabase
+    .from("order_items")
+    .select("product_name, unit_price_cents, quantity")
+    .eq("order_id", orderId)
+    .returns<{ product_name: string; unit_price_cents: number; quantity: number }[]>();
+  if (!snapshot?.length) back("/carrinho", "/carrinho", "erro", "erro_inesperado");
+
   const origin = siteOrigin((await headers()).get("host"));
   let url: string | null = null;
 
@@ -99,13 +108,12 @@ export async function checkout() {
       customer_email: viewer.email,
       client_reference_id: orderId as string,
       metadata: { order_id: orderId as string },
-      // Preços montados a partir do banco, nunca do que veio do navegador.
-      line_items: items.map((item) => ({
+      line_items: snapshot.map((item) => ({
         quantity: item.quantity,
         price_data: {
           currency: "brl",
-          unit_amount: item.priceCents,
-          product_data: { name: item.name },
+          unit_amount: item.unit_price_cents,
+          product_data: { name: item.product_name },
         },
       })),
       success_url: `${origin}/pedido/${orderId}`,

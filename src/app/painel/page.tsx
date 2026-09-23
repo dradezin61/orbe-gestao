@@ -4,6 +4,7 @@ import Link from "next/link";
 import { markShipped, saveProduct } from "@/app/admin-actions";
 import { Flash } from "@/components/flash";
 import { OrderStatusBadge, type OrderStatus } from "@/components/order-status";
+import { ProductImage } from "@/components/product-image";
 import { SubmitButton } from "@/components/submit-button";
 import { btnPrimary, btnSecondary, card, input, label } from "@/components/ui";
 import { requireAdmin } from "@/lib/auth";
@@ -31,6 +32,8 @@ type Product = {
   price_cents: number;
   stock: number;
   active: boolean;
+  image_path: string | null;
+  image_alt: string | null;
 };
 
 const param = (value: string | string[] | undefined) => (typeof value === "string" ? value : undefined);
@@ -51,16 +54,21 @@ export default async function AdminPage({ searchParams }: PageProps<"/painel">) 
       .returns<Order[]>(),
     supabase
       .from("products")
-      .select("id, name, summary, description, category, price_cents, stock, active")
+      .select("id, name, summary, description, category, price_cents, stock, active, image_path, image_alt")
       .order("name")
       .returns<Product[]>(),
   ]);
 
   const lista = pedidos ?? [];
   const catalogo = produtos ?? [];
-  const pagos = lista.filter((p) => p.status === "pago" || p.status === "enviado");
-  const receita = pagos.reduce((soma, p) => soma + p.total_cents, 0);
-  const aguardando = lista.filter((p) => p.status === "aguardando").length;
+
+  // Os indicadores somam todos os pedidos, não só os 40 da lista abaixo.
+  const [{ data: confirmados }, { count: aguardando }] = await Promise.all([
+    supabase.from("orders").select("total_cents").in("status", ["pago", "enviado"]).returns<{ total_cents: number }[]>(),
+    supabase.from("orders").select("id", { count: "exact", head: true }).eq("status", "aguardando"),
+  ]);
+  const receita = (confirmados ?? []).reduce((soma, p) => soma + p.total_cents, 0);
+  const pagos = confirmados ?? [];
   const semEstoque = catalogo.filter((p) => p.active && p.stock === 0).length;
   const produtoEmEdicao = editando ? catalogo.find((p) => p.id === editando) : undefined;
 
@@ -77,7 +85,7 @@ export default async function AdminPage({ searchParams }: PageProps<"/painel">) 
         {[
           { termo: "Receita confirmada", valor: formatMoney(receita) },
           { termo: "Pedidos pagos", valor: String(pagos.length) },
-          { termo: "Aguardando pagamento", valor: String(aguardando) },
+          { termo: "Aguardando pagamento", valor: String(aguardando ?? 0) },
           { termo: "Produtos sem estoque", valor: String(semEstoque) },
         ].map((item) => (
           <div key={item.termo} className={`${card} p-5`}>
@@ -107,6 +115,7 @@ export default async function AdminPage({ searchParams }: PageProps<"/painel">) 
 
       {aba === "pedidos" ? (
         <section aria-label="Pedidos" className="mt-4 grid gap-3">
+          <p className="text-sm text-muted">Os 40 pedidos mais recentes. Os indicadores acima somam todos.</p>
           {lista.length === 0 ? (
             <p className={`${card} p-6 text-muted`}>Nenhum pedido ainda.</p>
           ) : (
@@ -142,12 +151,26 @@ export default async function AdminPage({ searchParams }: PageProps<"/painel">) 
           <div className="grid gap-3">
             {catalogo.map((produto) => (
               <article key={produto.id} className={`${card} flex flex-wrap items-center justify-between gap-4 p-4`}>
-                <div className="min-w-48">
-                  <p className="font-semibold">
-                    {produto.name}
-                    {!produto.active ? <span className="ml-2 text-sm font-medium text-muted">fora do catálogo</span> : null}
-                  </p>
-                  <p className="mt-1 text-sm text-muted">{produto.category}</p>
+                <div className="flex min-w-48 items-center gap-3">
+                  <div className="w-14 shrink-0">
+                    <ProductImage
+                      path={produto.image_path}
+                      alt={produto.image_alt}
+                      name={produto.name}
+                      sizes="56px"
+                      className="rounded-lg"
+                    />
+                  </div>
+                  <div>
+                    <p className="font-semibold">
+                      {produto.name}
+                      {!produto.active ? <span className="ml-2 text-sm font-medium text-muted">fora do catálogo</span> : null}
+                    </p>
+                    <p className="mt-1 text-sm text-muted">
+                      {produto.category}
+                      {!produto.image_path ? <span className="ml-2 text-accent">sem foto</span> : null}
+                    </p>
+                  </div>
                 </div>
                 <div className="flex items-center gap-4">
                   <p className="tabular-nums">{formatMoney(produto.price_cents)}</p>
@@ -190,6 +213,30 @@ export default async function AdminPage({ searchParams }: PageProps<"/painel">) 
                   </option>
                 ))}
               </select>
+            </div>
+
+            <div className="grid gap-1.5">
+              <label htmlFor="imagePath" className={label}>Caminho da fotografia</label>
+              <input
+                id="imagePath"
+                name="imagePath"
+                defaultValue={produtoEmEdicao?.image_path ?? ""}
+                placeholder="/products/jarra-vidro.jpg"
+                className={input}
+              />
+              <p className="text-xs text-muted">Arquivo dentro de public/, começando com barra.</p>
+            </div>
+
+            <div className="grid gap-1.5">
+              <label htmlFor="imageAlt" className={label}>Descrição da fotografia</label>
+              <input
+                id="imageAlt"
+                name="imageAlt"
+                maxLength={300}
+                defaultValue={produtoEmEdicao?.image_alt ?? ""}
+                placeholder="O que aparece na foto"
+                className={input}
+              />
             </div>
 
             <div className="grid gap-4 sm:grid-cols-2">
